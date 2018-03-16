@@ -2,8 +2,8 @@
 #define DIM 10
 void main() {
 	char tablero[DIM][DIM];
-	char indice_abajo = 'a', indice_derecha = 0;
-	int x, y, indice_arriba = 'a',indice_izquierda = 0;
+	char indice_abajo = 'a', indice_arriba = 'a';
+	int x, y, indice_derecha, indice_izquierda = 0;
 	for (x = 0; x < DIM; x++) {
 		for (y = 0; y < DIM; y++) {
 			if ((x + 1 * y + 1) % 2 == 0) {
