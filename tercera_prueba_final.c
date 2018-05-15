@@ -35,7 +35,7 @@ int revision_rey(int tablero[DIM][DIM], int fila, int columna, int fila_aux, int
 int caen_en_el_mismo_sitio(struct pieza *pieza);
 void imprimir_tablero(char tablero_color[DIM][DIM], int tablero_piezas[DIM][DIM]);
 void pieza_capturada(int tablero[DIM][DIM], struct todas *piezas, struct pieza *pieza, int fila_aux, int columna_aux);
-void coronar(struct todas *pieza);
+void coronar(int tablero[DIM][DIM], struct todas *pieza);
 
 void main() {
 
@@ -210,16 +210,16 @@ void main() {
 		tablero_piezas[piezas.torre_n[i].fila][piezas.torre_n[i].columna] = piezas.torre_n[i].valor;
 	}
 	for (i = 0; i < MAX_PIEZAS; i++) {
-		if (i == 1) {
+		if (i == 0) {
 			piezas.reina_n[i].capturada = 0;
-			piezas.reina_n[i].valor = 6;
-			piezas.reina_n[i].fila = 8;
+			piezas.reina_n[i].valor = 7;
+			piezas.reina_n[i].fila = 1;
 			piezas.reina_n[i].columna = 4;
 			tablero_piezas[piezas.reina_n[i].fila][piezas.reina_n[i].columna] = piezas.reina_n[i].valor;
 		}
 		else {
 			piezas.reina_n[i].capturada = 1;
-			piezas.reina_n[i].valor = 6;
+			piezas.reina_n[i].valor = 7;
 			piezas.reina_n[i].fila = 8;
 			piezas.reina_n[i].columna = 4;
 		}
@@ -269,7 +269,7 @@ void main() {
 	}
 
 	contador_mov = 0;
-
+	
 	do {
 
 		if (contador_mov % 2 == 0) {
@@ -674,10 +674,10 @@ void main() {
 					break;
 
 				}
-				coronar(&piezas);
 				system("cls");
 			}
 		}
+		coronar(&tablero_piezas, &piezas);
 		contador_mov++;
 	
 	} while (1);
@@ -1254,7 +1254,7 @@ void pieza_capturada(int tablero[DIM][DIM], struct todas *piezas, struct pieza *
 	}
 }
 
-void coronar(struct todas *pieza) {
+void coronar(int tablero[DIM][DIM], struct todas *pieza) {
 	int i, j;
 	char opcion;
 	for (i = 0; i < MAX_PIEZAS; i++) {
@@ -1271,7 +1271,8 @@ void coronar(struct todas *pieza) {
 					if (pieza->reina[j].capturada == 1) {
 						pieza->reina[j].capturada = 0;
 						pieza->reina[j].fila = pieza->peon[i].fila;
-						pieza->reina[j].columna = pieza->peon[i].columna;;
+						pieza->reina[j].columna = pieza->peon[i].columna;
+						tablero[pieza->peon[i].fila][pieza->peon[i].columna] = pieza->reina[j].valor;
 						break;
 					}
 				}
@@ -1282,7 +1283,8 @@ void coronar(struct todas *pieza) {
 					if (pieza->alfil[j].capturada == 1) {
 						pieza->alfil[j].capturada = 0;
 						pieza->alfil[j].fila = pieza->peon[i].fila;
-						pieza->alfil[j].columna = pieza->peon[i].columna;;
+						pieza->alfil[j].columna = pieza->peon[i].columna;
+						tablero[pieza->peon[i].fila][pieza->peon[i].columna] = pieza->alfil[j].valor;
 						break;
 					}
 				}
@@ -1293,7 +1295,8 @@ void coronar(struct todas *pieza) {
 					if (pieza->torre[j].capturada == 1) {
 						pieza->torre[j].capturada = 0;
 						pieza->torre[j].fila = pieza->peon[i].fila;
-						pieza->torre[j].columna = pieza->peon[i].columna;;
+						pieza->torre[j].columna = pieza->peon[i].columna;
+						tablero[pieza->peon[i].fila][pieza->peon[i].columna] = pieza->torre[j].valor;
 						break;
 					}
 				}
@@ -1304,7 +1307,8 @@ void coronar(struct todas *pieza) {
 					if (pieza->caballo[j].capturada == 1) {
 						pieza->caballo[j].capturada = 0;
 						pieza->caballo[j].fila = pieza->peon[i].fila;
-						pieza->caballo[j].columna = pieza->peon[i].columna;;
+						pieza->caballo[j].columna = pieza->peon[i].columna;
+						tablero[pieza->peon[i].fila][pieza->peon[i].columna] = pieza->caballo[j].valor;
 						break;
 					}
 				}
@@ -1324,7 +1328,8 @@ void coronar(struct todas *pieza) {
 					if (pieza->reina_n[j].capturada == 1) {
 						pieza->reina_n[j].capturada = 0;
 						pieza->reina_n[j].fila = pieza->peon_n[i].fila;
-						pieza->reina_n[j].columna = pieza->peon_n[i].columna;;
+						pieza->reina_n[j].columna = pieza->peon_n[i].columna;
+						tablero[pieza->peon[i].fila][pieza->peon[i].columna] = pieza->reina_n[j].valor;
 						break;
 					}
 				}
@@ -1335,7 +1340,8 @@ void coronar(struct todas *pieza) {
 					if (pieza->alfil_n[j].capturada == 1) {
 						pieza->alfil_n[j].capturada = 0;
 						pieza->alfil_n[j].fila = pieza->peon_n[i].fila;
-						pieza->alfil_n[j].columna = pieza->peon_n[i].columna;;
+						pieza->alfil_n[j].columna = pieza->peon_n[i].columna;
+						tablero[pieza->peon[i].fila][pieza->peon[i].columna] = pieza->alfil_n[j].valor;
 						break;
 					}
 				}
@@ -1346,7 +1352,8 @@ void coronar(struct todas *pieza) {
 					if (pieza->torre_n[j].capturada == 1) {
 						pieza->torre_n[j].capturada = 0;
 						pieza->torre_n[j].fila = pieza->peon_n[i].fila;
-						pieza->torre_n[j].columna = pieza->peon_n[i].columna;;
+						pieza->torre_n[j].columna = pieza->peon_n[i].columna;
+						tablero[pieza->peon[i].fila][pieza->peon[i].columna] = pieza->torre_n[j].valor;
 						break;
 					}
 				}
@@ -1357,7 +1364,8 @@ void coronar(struct todas *pieza) {
 					if (pieza->caballo_n[j].capturada == 1) {
 						pieza->caballo_n[j].capturada = 0;
 						pieza->caballo_n[j].fila = pieza->peon_n[i].fila;
-						pieza->caballo_n[j].columna = pieza->peon_n[i].columna;;
+						pieza->caballo_n[j].columna = pieza->peon_n[i].columna;
+						tablero[pieza->peon[i].fila][pieza->peon[i].columna] = pieza->caballo_n[j].valor;
 						break;
 					}
 				}
