@@ -13,13 +13,14 @@ struct pieza {
 void pedir_destino(int *columna_aux, int *fila_aux);
 int revision_peon(int tablero[DIM][DIM], int fila, int columna, int fila_aux, int columna_aux);
 int revision_peon_n(int tablero[DIM][DIM], int fila, int columna, int fila_aux, int columna_aux);
-int revision_caballo(int tablero[DIM][DIM], int fila, int columna, int fila_aux, int columna_aux);
-int revision_alfil(int tablero[DIM][DIM], int fila, int columna, int fila_aux, int columna_aux);
-int revision_torre(int tablero[DIM][DIM], int fila, int columna, int fila_aux, int columna_aux);
-int revision_reina(int tablero[DIM][DIM], int fila, int columna, int fila_aux, int columna_aux);
-int revision_rey(int tablero[DIM][DIM], int fila, int columna, int fila_aux, int columna_aux);
+int revision_caballo(int tablero[DIM][DIM], int fila, int columna, int fila_aux, int columna_aux, int valor);
+int revision_alfil(int tablero[DIM][DIM], int fila, int columna, int fila_aux, int columna_aux, int valor);
+int revision_torre(int tablero[DIM][DIM], int fila, int columna, int fila_aux, int columna_aux, int valor);
+int revision_reina(int tablero[DIM][DIM], int fila, int columna, int fila_aux, int columna_aux, int valor);
+int revision_rey(int tablero[DIM][DIM], int fila, int columna, int fila_aux, int columna_aux, int valor );
 int caen_en_el_mismo_sitio(struct pieza *pieza);
 void imprimir_tablero(char tablero_color[DIM][DIM], int tablero_piezas[DIM][DIM]);
+int check(int tablero[DIM][DIM], struct pieza *peon, struct pieza *caballo, struct pieza *alfil, struct pieza *torre, struct pieza *reina, struct pieza *rey);
 
 void main() {
 
@@ -47,8 +48,7 @@ void main() {
 	int num_piezas;
 	int mov_producido; //se ha movido una pieza
 	int contador_mov; //contador blancas o negras
-	int captura;
-	int valorCaida;
+	int jaque; 
 
 	//TABLERO
 	char tablero_color[DIM][DIM]; //Casillas blancas o negras
@@ -171,10 +171,10 @@ void main() {
 	for (fila = 0; fila < DIM; fila++) {
 		for (columna = 0; columna < DIM; columna++) {
 			if ((fila + (1 * columna) + 1) % 2 == 0) {
-				tablero_color[fila][columna] = '*';
+				tablero_color[fila][columna] = '\261';
 			}
 			else {
-				tablero_color[fila][columna] = '.';
+				tablero_color[fila][columna] = '\333';
 			}
 		}
 	}
@@ -182,9 +182,10 @@ void main() {
 	//ELEMENTOS AUXILIARES DEL TABLERO DE CASILLAS BLANCAS Y NEGRAS
 	for (fila = 0; fila < DIM; fila++) {
 		for (columna = 0; columna < DIM; columna++) {
-			if ((fila == 0 && columna == 0) || (fila == 0 && columna == 9) || (fila == 9 && columna == 0) || (fila == 9 && columna == 9)) {
+			if ((fila == 0 && columna == 0)|| (fila == 0 && columna == 9)|| (fila == 9 && columna == 0) || (fila == 9 && columna == 9)) {
 				tablero_color[fila][columna] = ' ';
-			}
+			}	
+			
 			else if (fila == 0) {
 				tablero_color[fila][columna] = indice_superior;
 				indice_superior++;
@@ -212,429 +213,450 @@ void main() {
 			printf("Mueven Blancas \n\n\n");
 			mov_producido = 0;
 			while (mov_producido == 0) {
-
-				imprimir_tablero(tablero_color, tablero_piezas);
-
-				printf("Elija pieza: ");
-				scanf_s("%c", &pieza_elegida);
-				getchar();
-
-				switch (pieza_elegida) {
-				case 'p':
-				case 'P':
-					pedir_destino(&columna_aux, &fila_aux);
-					num_piezas = 0;
-					for (i = 0; i < 8; i++) {
-						peon[i].revisar = revision_peon(tablero_piezas, peon[i].fila, peon[i].columna, fila_aux, columna_aux);
-						if (peon[i].revisar == 1) {
-							num_piezas++;
-						}
-					}
-					if (num_piezas > 1) {
-						i = caen_en_el_mismo_sitio(&peon);
-
-						tablero_piezas[peon[i].fila][peon[i].columna] = 0;
-						peon[i].fila = fila_aux;
-						peon[i].columna = columna_aux;
-
-						tablero_piezas[peon[i].fila][peon[i].columna] = peon[i].valor;
-						mov_producido = 1;
+				do{
+					imprimir_tablero(tablero_color, tablero_piezas);
+					jaque = check(tablero_piezas, &peon_n, &caballo_n, &alfil_n, &torre_n, &reina_n, &rey);
+					if (jaque == 1) {
+						printf("CHECK \n");
 					}
 
-					else if (num_piezas == 1) {
+					printf("Elija pieza: ");
+					scanf_s("%c", &pieza_elegida);
+					getchar();
+
+					switch (pieza_elegida) {
+					case 'p':
+					case 'P':
+						pedir_destino(&columna_aux, &fila_aux);
+						num_piezas = 0;
 						for (i = 0; i < 8; i++) {
+							peon[i].revisar = revision_peon(tablero_piezas, peon[i].fila, peon[i].columna, fila_aux, columna_aux);
 							if (peon[i].revisar == 1) {
-								break;
+								num_piezas++;
 							}
 						}
-						tablero_piezas[peon[i].fila][peon[i].columna] = 0;
-						peon[i].fila = fila_aux;
-						peon[i].columna = columna_aux;
+						if (num_piezas > 1) {
+							i = caen_en_el_mismo_sitio(&peon);
 
-						tablero_piezas[peon[i].fila][peon[i].columna] = peon[i].valor;
-						mov_producido = 1;			
-					}
-					else {
-						printf("Movimiento no valido \n");
-						system("pause");
-					}
+							tablero_piezas[peon[i].fila][peon[i].columna] = 0;
+							peon[i].fila = fila_aux;
+							peon[i].columna = columna_aux;
 
-					break;
-				case 'c':
-				case'C':
-
-					pedir_destino(&columna_aux, &fila_aux);
-					num_piezas = 0;
-					for (i = 0; i < 2; i++) {
-						caballo[i].revisar = revision_caballo(tablero_piezas, caballo[i].fila, caballo[i].columna, fila_aux, columna_aux);
-						if (caballo[i].revisar == 1) {
-							num_piezas++;
+							tablero_piezas[peon[i].fila][peon[i].columna] = peon[i].valor;
+							mov_producido = 1;
 						}
-					}
-					if (num_piezas > 1) {
-						i = caen_en_el_mismo_sitio(&caballo);
 
-						tablero_piezas[caballo[i].fila][caballo[i].columna] = 0;
-						caballo[i].fila = fila_aux;
-						caballo[i].columna = columna_aux;
+						else if (num_piezas == 1) {
+							for (i = 0; i < 8; i++) {
+								if (peon[i].revisar == 1) {
+									break;
+								}
+							}
+							tablero_piezas[peon[i].fila][peon[i].columna] = 0;
+							peon[i].fila = fila_aux;
+							peon[i].columna = columna_aux;
 
-						tablero_piezas[caballo[i].fila][caballo[i].columna] = caballo[i].valor;
-						mov_producido = 1;
-					}
+							tablero_piezas[peon[i].fila][peon[i].columna] = peon[i].valor;
+							mov_producido = 1;
+						}
+						else {
+							printf("Movimiento no valido \n");
+							system("pause");
+						}
 
-					else if (num_piezas == 1) {
+						break;
+					case 'c':
+					case'C':
+
+						pedir_destino(&columna_aux, &fila_aux);
+						num_piezas = 0;
 						for (i = 0; i < 2; i++) {
+							caballo[i].revisar = revision_caballo(tablero_piezas, caballo[i].fila, caballo[i].columna, fila_aux, columna_aux, caballo[i].valor);
 							if (caballo[i].revisar == 1) {
-								break;
+								num_piezas++;
 							}
 						}
-						tablero_piezas[caballo[i].fila][caballo[i].columna] = 0;
-						caballo[i].fila = fila_aux;
-						caballo[i].columna = columna_aux;
+						if (num_piezas > 1) {
+							i = caen_en_el_mismo_sitio(&caballo);
 
-						tablero_piezas[caballo[i].fila][caballo[i].columna] = caballo[i].valor;
-						mov_producido = 1;			
-					}
-					else {
-						printf("Movimiento no valido \n");
-						system("pause");
-					}
+							tablero_piezas[caballo[i].fila][caballo[i].columna] = 0;
+							caballo[i].fila = fila_aux;
+							caballo[i].columna = columna_aux;
 
-					break;
-				case 'a':
-				case 'A':
-
-					pedir_destino(&columna_aux, &fila_aux);
-					num_piezas = 0;
-					for (i = 0; i < 2; i++) {
-						alfil[i].revisar = revision_alfil(tablero_piezas, alfil[i].fila, alfil[i].columna, fila_aux, columna_aux);
-						if (alfil[i].revisar == 1) {
-							num_piezas = 1;
+							tablero_piezas[caballo[i].fila][caballo[i].columna] = caballo[i].valor;
+							mov_producido = 1;
 						}
-					}
-					if (num_piezas == 1) {
+
+						else if (num_piezas == 1) {
+							for (i = 0; i < 2; i++) {
+								if (caballo[i].revisar == 1) {
+									break;
+								}
+							}
+							tablero_piezas[caballo[i].fila][caballo[i].columna] = 0;
+							caballo[i].fila = fila_aux;
+							caballo[i].columna = columna_aux;
+
+							tablero_piezas[caballo[i].fila][caballo[i].columna] = caballo[i].valor;
+							mov_producido = 1;
+						}
+						else {
+							printf("Movimiento no valido \n");
+							system("pause");
+						}
+
+						break;
+					case 'a':
+					case 'A':
+
+						pedir_destino(&columna_aux, &fila_aux);
+						num_piezas = 0;
 						for (i = 0; i < 2; i++) {
+							alfil[i].revisar = revision_alfil(tablero_piezas, alfil[i].fila, alfil[i].columna, fila_aux, columna_aux, alfil[i].valor);
 							if (alfil[i].revisar == 1) {
-								break;
+								num_piezas = 1;
 							}
 						}
-						tablero_piezas[alfil[i].fila][alfil[i].columna] = 0;
-						alfil[i].fila = fila_aux;
-						alfil[i].columna = columna_aux;
+						if (num_piezas == 1) {
+							for (i = 0; i < 2; i++) {
+								if (alfil[i].revisar == 1) {
+									break;
+								}
+							}
+							tablero_piezas[alfil[i].fila][alfil[i].columna] = 0;
+							alfil[i].fila = fila_aux;
+							alfil[i].columna = columna_aux;
 
-						tablero_piezas[alfil[i].fila][alfil[i].columna] = alfil[i].valor;
-						mov_producido = 1;
-					}
-					else {
-						printf("Movimiento no valido \n");
-						system("pause");
-					}
-
-					break;
-				case 't':
-				case 'T':
-
-					pedir_destino(&columna_aux, &fila_aux);
-					num_piezas = 0;
-					for (i = 0; i < 2; i++) {
-						torre[i].revisar = revision_torre(tablero_piezas, torre[i].fila, torre[i].columna, fila_aux, columna_aux);
-						if (torre[i].revisar == 1) {
-							num_piezas++;
+							tablero_piezas[alfil[i].fila][alfil[i].columna] = alfil[i].valor;
+							mov_producido = 1;
 						}
-					}
-					if (num_piezas > 1) {
-						i = caen_en_el_mismo_sitio(&torre);
+						else {
+							printf("Movimiento no valido \n");
+							system("pause");
+						}
 
-						tablero_piezas[torre[i].fila][torre[i].columna] = 0;
-						torre[i].fila = fila_aux;
-						torre[i].columna = columna_aux;
+						break;
+					case 't':
+					case 'T':
 
-						tablero_piezas[torre[i].fila][torre[i].columna] = torre[i].valor;
-						mov_producido = 1;	
-					}
-
-					else if (num_piezas == 1) {
+						pedir_destino(&columna_aux, &fila_aux);
+						num_piezas = 0;
 						for (i = 0; i < 2; i++) {
+							torre[i].revisar = revision_torre(tablero_piezas, torre[i].fila, torre[i].columna, fila_aux, columna_aux, torre[i].valor);
 							if (torre[i].revisar == 1) {
-								break;
+								num_piezas++;
 							}
 						}
-						tablero_piezas[torre[i].fila][torre[i].columna] = 0;
-						torre[i].fila = fila_aux;
-						torre[i].columna = columna_aux;
+						if (num_piezas > 1) {
+							i = caen_en_el_mismo_sitio(&torre);
 
-						tablero_piezas[torre[i].fila][torre[i].columna] = torre[i].valor;
-						mov_producido = 1;		
+							tablero_piezas[torre[i].fila][torre[i].columna] = 0;
+							torre[i].fila = fila_aux;
+							torre[i].columna = columna_aux;
+
+							tablero_piezas[torre[i].fila][torre[i].columna] = torre[i].valor;
+							mov_producido = 1;
+						}
+
+						else if (num_piezas == 1) {
+							for (i = 0; i < 2; i++) {
+								if (torre[i].revisar == 1) {
+									break;
+								}
+							}
+							tablero_piezas[torre[i].fila][torre[i].columna] = 0;
+							torre[i].fila = fila_aux;
+							torre[i].columna = columna_aux;
+
+							tablero_piezas[torre[i].fila][torre[i].columna] = torre[i].valor;
+							mov_producido = 1;
+						}
+						else {
+							printf("Movimiento no valido \n");
+							system("pause");
+						}
+						break;
+
+					case 'r':
+					case 'R':
+
+						pedir_destino(&columna_aux, &fila_aux);
+						reina.revisar = revision_reina(tablero_piezas, reina.fila, reina.columna, fila_aux, columna_aux, reina.valor);
+
+						if (reina.revisar == 1) {
+							tablero_piezas[reina.fila][reina.columna] = 0;
+							reina.fila = fila_aux;
+							reina.columna = columna_aux;
+
+							tablero_piezas[reina.fila][reina.columna] = reina.valor;
+							mov_producido = 1;
+						}
+						else {
+							printf("Movimiento no valido \n");
+							system("pause");
+						}
+						break;
+					case 'k':
+					case 'K':
+
+						pedir_destino(&columna_aux, &fila_aux);
+						rey.revisar = revision_rey(tablero_piezas, rey.fila, rey.columna, fila_aux, columna_aux, rey.valor);
+
+						if (rey.revisar == 1) {
+
+							tablero_piezas[rey.fila][rey.columna] = 0;
+							rey.fila = fila_aux;
+							rey.columna = columna_aux;
+
+							tablero_piezas[rey.fila][rey.columna] = rey.valor;
+							mov_producido = 1;
+						}
+						else {
+							printf("Movimiento no valido \n");
+							system("pause");
+						}
+						break;
+					default:
+						break;
+
 					}
-					else {
+
+					jaque = check(tablero_piezas, &peon_n, &caballo_n, &alfil_n, &torre_n, &reina_n, &rey);
+					if (jaque > 0) {
 						printf("Movimiento no valido \n");
-						system("pause");
 					}
-					break;
 
-				case 'r':
-				case 'R':
+					system("cls");
 
-					pedir_destino(&columna_aux, &fila_aux);
-					reina.revisar = revision_reina(tablero_piezas, reina.fila, reina.columna, fila_aux, columna_aux);
-
-					if (reina.revisar == 1) {
-						tablero_piezas[reina.fila][reina.columna] = 0;
-						reina.fila = fila_aux;
-						reina.columna = columna_aux;
-
-						tablero_piezas[reina.fila][reina.columna] = reina.valor;
-						mov_producido = 1;			
-					}
-					else {
-						printf("Movimiento no valido \n");
-						system("pause");
-					}
-					break;
-				case 'k':
-				case 'K':
-
-					pedir_destino(&columna_aux, &fila_aux);
-					rey.revisar = revision_rey(tablero_piezas, rey.fila, rey.columna, fila_aux, columna_aux);
-
-					if (rey.revisar == 1) {
-
-						tablero_piezas[rey.fila][rey.columna] = 0;
-						rey.fila = fila_aux;
-						rey.columna = columna_aux;
-
-						tablero_piezas[rey.fila][rey.columna] = rey.valor;
-						mov_producido = 1;						
-					}
-					else {
-						printf("Movimiento no valido \n");
-						system("pause");
-					}
-					break;
-				default:
-					break;
-
-				}
-				system("cls");
+				}while (jaque > 0);
 			}
 		}
 		else {
 			printf("Mueven Negras \n\n\n");
 			mov_producido = 0;
 			while (mov_producido == 0) {
-
-				imprimir_tablero(tablero_color, tablero_piezas);
-
-				printf("Elija pieza: ");
-				scanf_s("%c", &pieza_elegida);
-				getchar();
-
-				switch (pieza_elegida) {
-				case 'p':
-				case 'P':
-					pedir_destino(&columna_aux, &fila_aux);
-					num_piezas = 0;
-					for (i = 0; i < 8; i++) {
-						peon_n[i].revisar = revision_peon_n(tablero_piezas, peon_n[i].fila, peon_n[i].columna, fila_aux, columna_aux);
-						if (peon_n[i].revisar == 1) {
-							num_piezas++;
-						}
-					}
-					if (num_piezas > 1) {
-						i = caen_en_el_mismo_sitio(&peon_n);
-
-						tablero_piezas[peon_n[i].fila][peon_n[i].columna] = 0;
-
-						peon_n[i].fila = fila_aux;
-						peon_n[i].columna = columna_aux;
-
-						tablero_piezas[peon_n[i].fila][peon_n[i].columna] = peon_n[i].valor;
-						mov_producido = 1;
+				do {
+					imprimir_tablero(tablero_color, tablero_piezas);
+					jaque = check(tablero_piezas, &peon, &caballo, &alfil, &torre, &reina, &rey_n);
+					if (jaque == 1) {
+						printf("CHECK \n");
 					}
 
-					else if (num_piezas == 1) {
+					printf("Elija pieza: ");
+					scanf_s("%c", &pieza_elegida);
+					getchar();
+
+					switch (pieza_elegida) {
+					case 'p':
+					case 'P':
+						pedir_destino(&columna_aux, &fila_aux);
+						num_piezas = 0;
 						for (i = 0; i < 8; i++) {
+							peon_n[i].revisar = revision_peon_n(tablero_piezas, peon_n[i].fila, peon_n[i].columna, fila_aux, columna_aux);
 							if (peon_n[i].revisar == 1) {
-								break;
+								num_piezas++;
 							}
 						}
-						tablero_piezas[peon_n[i].fila][peon_n[i].columna] = 0;
+						if (num_piezas > 1) {
+							i = caen_en_el_mismo_sitio(&peon_n);
 
-						peon_n[i].fila = fila_aux;
-						peon_n[i].columna = columna_aux;
+							tablero_piezas[peon_n[i].fila][peon_n[i].columna] = 0;
 
-						tablero_piezas[peon_n[i].fila][peon_n[i].columna] = peon_n[i].valor;
-						mov_producido = 1;
-					}
-					else {
-						printf("Movimiento no valido \n");
-						system("pause");
-					}
+							peon_n[i].fila = fila_aux;
+							peon_n[i].columna = columna_aux;
 
-					break;
-				case 'c':
-				case'C':
-
-					pedir_destino(&columna_aux, &fila_aux);
-					num_piezas = 0;
-					for (i = 0; i < 2; i++) {
-						caballo_n[i].revisar = revision_caballo(tablero_piezas, caballo_n[i].fila, caballo_n[i].columna, fila_aux, columna_aux);
-						if (caballo_n[i].revisar == 1) {
-							num_piezas++;
+							tablero_piezas[peon_n[i].fila][peon_n[i].columna] = peon_n[i].valor;
+							mov_producido = 1;
 						}
-					}
-					if (num_piezas > 1) {
-						i = caen_en_el_mismo_sitio(&caballo);
 
-						tablero_piezas[caballo_n[i].fila][caballo_n[i].columna] = 0;
+						else if (num_piezas == 1) {
+							for (i = 0; i < 8; i++) {
+								if (peon_n[i].revisar == 1) {
+									break;
+								}
+							}
+							tablero_piezas[peon_n[i].fila][peon_n[i].columna] = 0;
 
-						caballo_n[i].fila = fila_aux;
-						caballo_n[i].columna = columna_aux;
+							peon_n[i].fila = fila_aux;
+							peon_n[i].columna = columna_aux;
 
-						tablero_piezas[caballo_n[i].fila][caballo_n[i].columna] = caballo[i].valor;
-						mov_producido = 1;
-					}
+							tablero_piezas[peon_n[i].fila][peon_n[i].columna] = peon_n[i].valor;
+							mov_producido = 1;
+						}
+						else {
+							printf("Movimiento no valido \n");
+							system("pause");
+						}
 
-					else if (num_piezas == 1) {
+						break;
+					case 'c':
+					case'C':
+
+						pedir_destino(&columna_aux, &fila_aux);
+						num_piezas = 0;
 						for (i = 0; i < 2; i++) {
+							caballo_n[i].revisar = revision_caballo(tablero_piezas, caballo_n[i].fila, caballo_n[i].columna, fila_aux, columna_aux, caballo_n[i].valor);
 							if (caballo_n[i].revisar == 1) {
-								break;
+								num_piezas++;
 							}
 						}
-						tablero_piezas[caballo_n[i].fila][caballo_n[i].columna] = 0;
+						if (num_piezas > 1) {
+							i = caen_en_el_mismo_sitio(&caballo);
 
-						caballo_n[i].fila = fila_aux;
-						caballo_n[i].columna = columna_aux;
+							tablero_piezas[caballo_n[i].fila][caballo_n[i].columna] = 0;
 
-						tablero_piezas[caballo_n[i].fila][caballo_n[i].columna] = caballo_n[i].valor;
-						mov_producido = 1;
-					}
-					else {
-						printf("Movimiento no valido \n");
-						system("pause");
-					}
+							caballo_n[i].fila = fila_aux;
+							caballo_n[i].columna = columna_aux;
 
-					break;
-				case 'a':
-				case 'A':
-
-					pedir_destino(&columna_aux, &fila_aux);
-					num_piezas = 0;
-					for (i = 0; i < 2; i++) {
-						alfil_n[i].revisar = revision_alfil(tablero_piezas, alfil_n[i].fila, alfil_n[i].columna, fila_aux, columna_aux);
-						if (alfil_n[i].revisar == 1) {
-							num_piezas = 1;
+							tablero_piezas[caballo_n[i].fila][caballo_n[i].columna] = caballo[i].valor;
+							mov_producido = 1;
 						}
-					}
-					if (num_piezas == 1) {
+
+						else if (num_piezas == 1) {
+							for (i = 0; i < 2; i++) {
+								if (caballo_n[i].revisar == 1) {
+									break;
+								}
+							}
+							tablero_piezas[caballo_n[i].fila][caballo_n[i].columna] = 0;
+
+							caballo_n[i].fila = fila_aux;
+							caballo_n[i].columna = columna_aux;
+
+							tablero_piezas[caballo_n[i].fila][caballo_n[i].columna] = caballo_n[i].valor;
+							mov_producido = 1;
+						}
+						else {
+							printf("Movimiento no valido \n");
+							system("pause");
+						}
+
+						break;
+					case 'a':
+					case 'A':
+
+						pedir_destino(&columna_aux, &fila_aux);
+						num_piezas = 0;
 						for (i = 0; i < 2; i++) {
+							alfil_n[i].revisar = revision_alfil(tablero_piezas, alfil_n[i].fila, alfil_n[i].columna, fila_aux, columna_aux, alfil_n[i].valor);
 							if (alfil_n[i].revisar == 1) {
-								break;
+								num_piezas = 1;
 							}
 						}
-						tablero_piezas[alfil_n[i].fila][alfil_n[i].columna] = 0;
+						if (num_piezas == 1) {
+							for (i = 0; i < 2; i++) {
+								if (alfil_n[i].revisar == 1) {
+									break;
+								}
+							}
+							tablero_piezas[alfil_n[i].fila][alfil_n[i].columna] = 0;
 
-						alfil_n[i].fila = fila_aux;
-						alfil_n[i].columna = columna_aux;
+							alfil_n[i].fila = fila_aux;
+							alfil_n[i].columna = columna_aux;
 
-						tablero_piezas[alfil_n[i].fila][alfil_n[i].columna] = alfil_n[i].valor;
-						mov_producido = 1;
-					}
-					else {
-						printf("Movimiento no valido \n");
-						system("pause");
-					}
-
-					break;
-				case 't':
-				case 'T':
-
-					pedir_destino(&columna_aux, &fila_aux);
-					num_piezas = 0;
-					for (i = 0; i < 2; i++) {
-						torre_n[i].revisar = revision_torre(tablero_piezas, torre_n[i].fila, torre_n[i].columna, fila_aux, columna_aux);
-						if (torre_n[i].revisar == 1) {
-							num_piezas++;
+							tablero_piezas[alfil_n[i].fila][alfil_n[i].columna] = alfil_n[i].valor;
+							mov_producido = 1;
 						}
-					}
-					if (num_piezas > 1) {
-						i = caen_en_el_mismo_sitio(&torre);
+						else {
+							printf("Movimiento no valido \n");
+							system("pause");
+						}
 
-						tablero_piezas[torre_n[i].fila][torre_n[i].columna] = 0;
+						break;
+					case 't':
+					case 'T':
 
-						torre_n[i].fila = fila_aux;
-						torre_n[i].columna = columna_aux;
-
-						tablero_piezas[torre_n[i].fila][torre_n[i].columna] = torre_n[i].valor;
-						mov_producido = 1;
-					}
-
-					else if (num_piezas == 1) {
+						pedir_destino(&columna_aux, &fila_aux);
+						num_piezas = 0;
 						for (i = 0; i < 2; i++) {
+							torre_n[i].revisar = revision_torre(tablero_piezas, torre_n[i].fila, torre_n[i].columna, fila_aux, columna_aux, torre_n[i].valor);
 							if (torre_n[i].revisar == 1) {
-								break;
+								num_piezas++;
 							}
 						}
-						tablero_piezas[torre_n[i].fila][torre_n[i].columna] = 0;
+						if (num_piezas > 1) {
+							i = caen_en_el_mismo_sitio(&torre);
 
-						torre_n[i].fila = fila_aux;
-						torre_n[i].columna = columna_aux;
+							tablero_piezas[torre_n[i].fila][torre_n[i].columna] = 0;
 
-						tablero_piezas[torre_n[i].fila][torre_n[i].columna] = torre_n[i].valor;
-						mov_producido = 1;
+							torre_n[i].fila = fila_aux;
+							torre_n[i].columna = columna_aux;
+
+							tablero_piezas[torre_n[i].fila][torre_n[i].columna] = torre_n[i].valor;
+							mov_producido = 1;
+						}
+
+						else if (num_piezas == 1) {
+							for (i = 0; i < 2; i++) {
+								if (torre_n[i].revisar == 1) {
+									break;
+								}
+							}
+							tablero_piezas[torre_n[i].fila][torre_n[i].columna] = 0;
+
+							torre_n[i].fila = fila_aux;
+							torre_n[i].columna = columna_aux;
+
+							tablero_piezas[torre_n[i].fila][torre_n[i].columna] = torre_n[i].valor;
+							mov_producido = 1;
+						}
+						else {
+							printf("Movimiento no valido \n");
+							system("pause");
+						}
+						break;
+
+					case 'r':
+					case 'R':
+
+						pedir_destino(&columna_aux, &fila_aux);
+						reina_n.revisar = revision_reina(tablero_piezas, reina_n.fila, reina_n.columna, fila_aux, columna_aux, reina_n.valor);
+
+						if (reina_n.revisar == 1) {
+							tablero_piezas[reina_n.fila][reina_n.columna] = 0;
+
+							reina_n.fila = fila_aux;
+							reina_n.columna = columna_aux;
+
+							tablero_piezas[reina_n.fila][reina_n.columna] = reina_n.valor;
+							mov_producido = 1;
+						}
+						else {
+							printf("Movimiento no valido \n");
+							system("pause");
+						}
+						break;
+					case 'k':
+					case 'K':
+
+						pedir_destino(&columna_aux, &fila_aux);
+						rey_n.revisar = revision_rey(tablero_piezas, rey_n.fila, rey_n.columna, fila_aux, columna_aux, rey_n.valor);
+
+						if (rey_n.revisar == 1) {
+
+							tablero_piezas[rey_n.fila][rey_n.columna] = 0;
+
+							rey_n.fila = fila_aux;
+							rey_n.columna = columna_aux;
+
+							tablero_piezas[rey_n.fila][rey_n.columna] = rey_n.valor;
+							mov_producido = 1;
+						}
+						else {
+							printf("Movimiento no valido \n");
+							system("pause");
+						}
+						break;
+					default:
+						break;
+
 					}
-					else {
+					jaque = check(tablero_piezas, &peon, &caballo, &alfil, &torre, &reina, &rey_n);
+					if (jaque > 0) {
 						printf("Movimiento no valido \n");
-						system("pause");
 					}
-					break;
-
-				case 'r':
-				case 'R':
-
-					pedir_destino(&columna_aux, &fila_aux);
-					reina_n.revisar = revision_reina(tablero_piezas, reina_n.fila, reina_n.columna, fila_aux, columna_aux);
-
-					if (reina_n.revisar == 1) {
-						tablero_piezas[reina_n.fila][reina_n.columna] = 0;
-
-						reina_n.fila = fila_aux;
-						reina_n.columna = columna_aux;
-
-						tablero_piezas[reina_n.fila][reina_n.columna] = reina_n.valor;
-						mov_producido = 1;
-					}
-					else {
-						printf("Movimiento no valido \n");
-						system("pause");
-					}
-					break;
-				case 'k':
-				case 'K':
-
-					pedir_destino(&columna_aux, &fila_aux);
-					rey_n.revisar = revision_rey(tablero_piezas, rey_n.fila, rey_n.columna, fila_aux, columna_aux);
-
-					if (rey_n.revisar == 1) {
-
-						tablero_piezas[rey_n.fila][rey_n.columna] = 0;
-
-						rey_n.fila = fila_aux;
-						rey_n.columna = columna_aux;
-
-						tablero_piezas[rey_n.fila][rey_n.columna] = rey_n.valor;
-						mov_producido = 1;
-					}
-					else {
-						printf("Movimiento no valido \n");
-						system("pause");
-					}
-					break;
-				default:
-					break;
-
-				}
-				system("cls");
+					system("cls");
+				}while (jaque > 0);
 			}
 		}
 		contador_mov++;
@@ -648,7 +670,10 @@ void imprimir_tablero(char tablero_color[DIM][DIM], int tablero_piezas[DIM][DIM]
 	int fila, columna;
 	for (fila = 0; fila < DIM; fila++) {
 		for (columna = 0; columna < DIM; columna++) {
-			if (tablero_piezas[fila][columna] == 0) {
+			if ((columna == 9)||(columna==0)) {
+				printf("\t");
+			}
+			if ((tablero_piezas[fila][columna] == 0)) {
 				printf("%c\t", tablero_color[fila][columna]);
 			}
 			else if (tablero_piezas[fila][columna] == 1) {
@@ -690,10 +715,17 @@ void imprimir_tablero(char tablero_color[DIM][DIM], int tablero_piezas[DIM][DIM]
 			else {
 				printf("%d\t", tablero_piezas[fila][columna]);
 			}
+			if (columna == 0) {
+				printf("\t");
+			}
+		}
+		if ((fila == 0)||(fila==8)) {
+			printf("\n\n\n");
 		}
 		printf("\n\n\n");
 	}
 }
+
 void pedir_destino(int *columna_aux, int *fila_aux) {
 	char aux_columna;
 	printf("Introduzca la columna: ");
@@ -742,8 +774,13 @@ int revision_peon_n(int tablero[DIM][DIM], int fila, int columna, int fila_aux, 
 	}
 }
 
-int revision_caballo(int tablero[DIM][DIM], int fila, int columna, int fila_aux, int columna_aux) {
-	if ((tablero[fila_aux][columna_aux] <= 6) && (tablero[fila_aux][columna_aux] >= 1)) {
+int revision_caballo(int tablero[DIM][DIM], int fila, int columna, int fila_aux, int columna_aux, int valor) {
+	if(valor==2){
+		if ((tablero[fila_aux][columna_aux] <= 6) && (tablero[fila_aux][columna_aux] >= 1)) {
+			return 0;
+		}
+	}
+	else if((tablero[fila_aux][columna_aux] <= 12) && (tablero[fila_aux][columna_aux] >= 7)) {
 		return 0;
 	}
 	if (((fila - fila_aux) == 2) && ((columna - columna_aux) == 1)) {
@@ -775,7 +812,7 @@ int revision_caballo(int tablero[DIM][DIM], int fila, int columna, int fila_aux,
 	}
 }
 
-int revision_alfil(int tablero[DIM][DIM], int fila, int columna, int fila_aux, int columna_aux) {
+int revision_alfil(int tablero[DIM][DIM], int fila, int columna, int fila_aux, int columna_aux, int valor) {
 	int revision;
 	int i;
 	int j;
@@ -790,10 +827,14 @@ int revision_alfil(int tablero[DIM][DIM], int fila, int columna, int fila_aux, i
 		return 0;
 	}
 	if (revision == 1) {
-		if ((tablero[fila_aux][columna_aux] <= 6) && (tablero[fila_aux][columna_aux] >= 1)) {
+
+		if ((tablero[fila_aux][columna_aux] <= 6) && (tablero[fila_aux][columna_aux] >= 1)&&(valor==3)) {
 			return 0;
 		}
-		else if ((fila - columna) == (fila_aux - columna_aux)) {
+		else if ((tablero[fila_aux][columna_aux] <= 12) && (tablero[fila_aux][columna_aux] >= 7)) {
+			return 0;
+		}
+		if ((fila - columna) == (fila_aux - columna_aux)) {
 
 			if (columna > columna_aux) {
 				j = fila;
@@ -839,7 +880,7 @@ int revision_alfil(int tablero[DIM][DIM], int fila, int columna, int fila_aux, i
 	return 1;
 }
 
-int revision_torre(int tablero[DIM][DIM], int fila, int columna, int fila_aux, int columna_aux) {
+int revision_torre(int tablero[DIM][DIM], int fila, int columna, int fila_aux, int columna_aux, int valor) {
 	int revision;
 	int i;
 
@@ -853,10 +894,15 @@ int revision_torre(int tablero[DIM][DIM], int fila, int columna, int fila_aux, i
 		return 0;
 	}
 	if (revision == 1) {
-		if ((tablero[fila_aux][columna_aux] <= 6) && (tablero[fila_aux][columna_aux] >= 1)) {
+		if (valor == 4) {
+			if ((tablero[fila_aux][columna_aux] <= 6) && (tablero[fila_aux][columna_aux] >= 1)) {
+				return 0;
+			}
+		}
+		else if ((tablero[fila_aux][columna_aux] <= 12) && (tablero[fila_aux][columna_aux] >= 7)) {
 			return 0;
 		}
-		else if ((fila == fila_aux) && (columna != columna_aux)) {
+		if ((fila == fila_aux) && (columna != columna_aux)) {
 			if (columna > columna_aux) {
 				for (i = columna_aux + 1; i < columna; i++) { //EL MAS UNO ES PARA QUE SALTE LA CASILLA INCIAL POR SI HAY UN PIEZA CAPTURABLE
 					if (tablero[fila][i] != 0) {
@@ -892,7 +938,7 @@ int revision_torre(int tablero[DIM][DIM], int fila, int columna, int fila_aux, i
 	return 1;
 }
 
-int revision_reina(int tablero[DIM][DIM], int fila, int columna, int fila_aux, int columna_aux) {
+int revision_reina(int tablero[DIM][DIM], int fila, int columna, int fila_aux, int columna_aux, int valor) {
 	int revision;
 	int i;
 	int j;
@@ -913,10 +959,15 @@ int revision_reina(int tablero[DIM][DIM], int fila, int columna, int fila_aux, i
 		return 0;
 	}
 	if (revision == 1) {
-		if ((tablero[fila_aux][columna_aux] <= 6) && (tablero[fila_aux][columna_aux] >= 1)) {
+		if (valor == 6) {
+			if ((tablero[fila_aux][columna_aux] <= 6) && (tablero[fila_aux][columna_aux] >= 1)) {
+				return 0;
+			}
+		}
+		else if ((tablero[fila_aux][columna_aux] <= 12) && (tablero[fila_aux][columna_aux] >= 7)) {
 			return 0;
 		}
-		else if ((fila == fila_aux) && (columna != columna_aux)) {
+		if ((fila == fila_aux) && (columna != columna_aux)) {
 			if (columna > columna_aux) {
 				for (i = columna_aux + 1; i < columna; i++) { //EL MAS UNO ES PARA QUE SALTE LA CASILLA INCIAL POR SI HAY UN PIEZA CAPTURABLE
 					if (tablero[fila][i] != 0) {
@@ -994,9 +1045,16 @@ int revision_reina(int tablero[DIM][DIM], int fila, int columna, int fila_aux, i
 	return 1;
 }
 
-int revision_rey(int tablero[DIM][DIM], int fila, int columna, int fila_aux, int columna_aux) {
+int revision_rey(int tablero[DIM][DIM], int fila, int columna, int fila_aux, int columna_aux, int valor) {
 	int revision = 0;
-
+	if (valor == 5) {
+		if ((tablero[fila_aux][columna_aux] <= 6) && (tablero[fila_aux][columna_aux] >= 1)) {
+			return 0;
+		}
+	}
+	else if ((tablero[fila_aux][columna_aux] <= 12) && (tablero[fila_aux][columna_aux] >= 7)) {
+		return 0;
+	}
 	if (((fila == fila_aux) && (columna != columna_aux)) && ((columna - columna_aux) * (columna - columna_aux)) == 1) {
 		revision = 1;
 	}
@@ -1008,9 +1066,6 @@ int revision_rey(int tablero[DIM][DIM], int fila, int columna, int fila_aux, int
 	}
 	else if (((fila + columna) == (fila_aux + columna_aux)) && ((fila - fila_aux) * (fila - fila_aux)) == 1) {
 		revision = 1;
-	}
-	else if ((tablero[fila_aux][columna_aux] <= 6) && (tablero[fila_aux][columna_aux] >= 1)) {
-		return 0;
 	}
 	return revision;
 }
@@ -1038,3 +1093,24 @@ int caen_en_el_mismo_sitio(struct pieza *pieza) {
 	} while ((columna_busqueda != pieza[i].columna) || (fila_busqueda != pieza[i].fila));
 }
 
+int check(int tablero[DIM][DIM], struct pieza *peon, struct pieza *caballo,struct pieza *alfil, struct pieza *torre, struct pieza *reina, struct pieza *rey) {
+
+	int i;
+	int contador = 0;
+
+	for (i = 0; i < 8; i++) {
+		contador = contador + revision_peon(tablero,peon[i].fila,peon[i].columna, rey->fila, rey->columna);
+	}
+	for (i = 0; i < 2; i++) {
+		contador = contador + revision_caballo(tablero, caballo[i].fila, caballo[i].columna, rey->fila, rey->columna,caballo[i].valor);
+		contador = contador + revision_alfil(tablero, alfil[i].fila, alfil[i].columna, rey->fila, rey->columna,alfil[i].valor);
+		contador = contador + revision_torre(tablero,torre[i].fila, torre[i].columna, rey->fila, rey->columna,torre[i].valor);
+	}
+	contador = contador + revision_reina(tablero, reina->fila, reina->columna, rey->fila, rey->columna,reina->valor);
+	if (contador > 0) {
+		return 1;
+	}
+	else {
+		return 0;
+	}
+}
